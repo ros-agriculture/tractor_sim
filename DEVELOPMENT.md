@@ -18,7 +18,7 @@ container, and test the changes:
 
 ```
 make clean
-FLAVOR=lxqt ARCH=amd64 IMAGE=ubuntu:18.04 make build
+FLAVOR=lxde ARCH=amd64 IMAGE=ubuntu:16.04 REPO=ros-a/sim TAG=agbot make build
 make run
 ```
 

@@ -142,6 +142,128 @@ COPY rootfs /
 RUN ln -sf /usr/local/lib/web/frontend/static/websockify /usr/local/lib/web/frontend/static/novnc/utils/websockify && \
 	chmod +x /usr/local/lib/web/frontend/static/websockify/run
 
+
+# =================================
+# install ros (source: https://github.com/osrf/docker_images/blob/5399f380af0a7735405a4b6a07c6c40b867563bd/ros/kinetic/ubuntu/xenial/ros-core/Dockerfile)
+# install packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup keys
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros-latest.list
+
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    python-rosdep \
+    python-rosinstall \
+    python-catkin-tools  \
+    python-vcstools \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup environment
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+# bootstrap rosdep
+RUN rosdep init \
+    && rosdep update
+
+# install ros packages
+ENV ROS_DISTRO kinetic
+RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && apt-get update --fix-missing && apt-get install -y \
+    ros-kinetic-desktop-full \
+    ros-kinetic-geometry-msgs \
+    ros-kinetic-pcl-conversions \
+    ros-kinetic-pcl-ros \
+    ros-kinetic-tf2-ros \
+    ros-kinetic-rosserial \
+    ros-kinetic-rosserial-arduino \
+    ros-kinetic-ackermann-msgs \
+    ros-kinetic-jsk-rviz-plugins \
+    ros-kinetic-joy \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup entrypoint
+# COPY ./ros_entrypoint.sh /
+
+
+# =================================
+
+# user tools
+RUN apt-get update --fix-missing && apt-get install -y \
+    terminator \
+    gedit \
+    okular \
+    tmux \
+    vim \
+    git \
+    apt-utils \
+	libeigen3-dev \
+    less \
+    bash-completion \
+    wget \
+    snapd \
+    arduino \
+    python-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+# Ag simulator
+ENV CATKIN_WS=/root/tractor_ws
+RUN mkdir -p $CATKIN_WS/src
+
+# download lawn_tractor_sim source 
+RUN cd $CATKIN_WS/src \
+    && git clone -b 'v0.3-alpha' --single-branch --depth 1 https://github.com/ros-agriculture/ros_lawn_tractor.git \
+    && git clone https://github.com/ros-agriculture/tractor_teleop.git \
+    && git clone https://github.com/bsb808/geonav_transform.git \
+    && apt update \
+    && rosdep update \
+    && rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false \
+    && apt-get -qq upgrade
+
+RUN mv /bin/sh /bin/sh-old \
+    && ln -s /bin/bash /bin/sh
+
+RUN cd $CATKIN_WS \    
+    && source /opt/ros/kinetic/setup.bash \
+    && catkin build --no-status
+
+
+#
+#  Setup arduino
+#
+RUN mkdir -p /root/sketchbook/libraries \
+    && cd /root/sketchbook/libraries/   \
+    && source /opt/ros/kinetic/setup.bash \
+    && rosrun rosserial_arduino make_libraries.py .
+
+# 
+# VS Code and ROS
+#
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+RUN install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+RUN sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+
+RUN apt-get install apt-transport-https \
+  && apt-get update \
+  && apt-get install -y code
+
+#
+# AgBot files
+#
+COPY userfs /
+
+RUN echo "source /opt/ros/kinetic/setup.bash" >> /root/.bashrc
+RUN echo "source $CATKIN_WS/devel/setup.bash" >> ~/.bashrc
+
+
 EXPOSE 80
 WORKDIR /root
 ENV HOME=/home/ubuntu \

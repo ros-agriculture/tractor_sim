@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RQT
+Comment=RQT
+Exec=bash -c "source /opt/ros/kinetic/setup.bash&& rqt"
+Icon=/opt/ros/kinetic/share/rqt_gui/resource/rqt.png
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+StartupNotify=true
+Keywords=terminal;shell;prompt;command;commandline;

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Arduino to ROS
+Comment=Connects and Arduino to ROS
+Exec=bash -c "source /opt/ros/kinetic/setup.bash&& terminator --command=rosrun\ rosserial_python\ serial_node.py\ _port:=\/dev\/ttyUSB0\ _baud:=57600"
+Icon=/usr/lib/share/serial.png
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+StartupNotify=true
+Keywords=terminal;shell;prompt;command;commandline;

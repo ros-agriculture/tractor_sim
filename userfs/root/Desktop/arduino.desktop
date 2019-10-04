@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Arduino
+Comment=Arduino IDE
+TryExec=arduino
+Exec=arduino
+Icon=arduino
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+StartupNotify=true
+X-Ayatana-Desktop-Shortcuts=NewWindow;
+Keywords=terminal;shell;prompt;command;commandline;

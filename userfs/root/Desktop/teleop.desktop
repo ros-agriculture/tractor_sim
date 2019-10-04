@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Teleop
+Comment=Joystick control of tractor
+Exec=bash -c "source /root/tractor_ws/devel/setup.bash&& terminator --command=roslaunch\ tractor_teleop\ drive_teleop.launch"
+Icon=/usr/lib/share/teleop.png
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+StartupNotify=true
+Keywords=terminal;shell;prompt;command;commandline;
